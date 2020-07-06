@@ -1,0 +1,366 @@
+---
+title: "Homework 3"
+author: "Wesley Galvão"
+date: "16/06/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r message=FALSE, warning=FALSE}
+# Carregamento das bibliotecas e dataset
+library(ggplot2)    # library to create plots
+library(ggrepel)    # 
+library(gridExtra)  # arrange plots
+library(dplyr)      # tool for working with data frame like objects
+library(stringr)
+
+data(mpg)     # Load USArrests dataset
+mydata = mpg
+
+```
+
+## Questão 1
+Execute ggplot(data=mpg). Explique o que este comando faz.
+
+* 
+_O comando `ggplot(data=mpg)` gera um sistema de coordenadas baseado na biblioteca `ggplot2` que utiliza a base de dados `mpg`. Para que haja algum recurso estético e gráfico desejado, é necessário adicionar mais camadas ao sistema de coordenadas criado. 
+
+```{r}
+ggplot(data=mpg)
+```
+
+
+---
+
+## Questão 2
+
+Utilize o comando `?mpg` e descreva as variáveis contidas neste banco de dados. Faça uma análise preliminar deste banco de dados usando os comando head, tail, etc (como fizemos para `USArrests`).
+
+```{r}
+?mpg
+```
+
+**Descrição**
+
+Este conjunto de dados contém um subconjunto dos dados de economia de combustível que a EPA disponibiliza em http://fueleconomy.gov. Ele contém apenas modelos que tiveram um novo lançamento todos os anos entre 1999 e 2008 - isso foi usado como proxy da popularidade do carro.
+
+**As variáveis**
+
+* `manufacturer <chr>` nome do fabricante
+* `model <chr>` modelo
+* `displ <dbl>` deslocamento do motor, em litros
+* `year <int>` ano da fabricação
+* `cyl <int>` número de cilindros
+* `trans <chr>` tipo de transmissão
+* `drv <chr>` o tipo de tração, onde f = tração dianteira, r = tração traseira, 4 = 4x4
+* `cty <int>` milhas por galão na cidade
+* `hwy <int>` milhas por galão na rodovia
+* `fl <chr>` tipo de combustível
+* `class <chr>` classe ou tipo do carro
+ 
+**Análise prévia**
+
+```{r}
+cat("Número de linhas: ", dim(mydata)[1])
+cat("Número de colunas: ", dim(mydata)[2])
+cat("Nome das coluna: " )
+names(mydata)
+cat("Primeiras Linhas")
+head(mpg)
+cat("Últimas Linhas")
+tail(mpg)
+
+```
+
+```{r}
+
+```
+
+
+---
+
+## Questão 3
+
+Faça um gráfico de dispersão entre as variáveis `hwy` e `cyl`. Mude a cor do tema. Interprete os resultados.
+
+* O gráfico aparenta haver uma tendência negativa entre o o número de cilindros e a autonomia do automóvel na rodovia. Quanto mais cilindros o carro tem, menor é a distância em milhas por galão que o mesmo pode percorrer na rodovia. 
+
+```{r}
+mydata %>% 
+      ggplot(aes(y = hwy, x = cyl)) + 
+      geom_point(aes(colour = class) ) +
+      labs(title = "Correlation between number of cylinders and highway miles per gallon", 
+             x = "Number of cylinders", y = "Highway miles per gallon") + 
+      theme_bw() +
+      theme(plot.title = element_text(hjust=0.5, size = 12))
+```
+
+
+---
+
+## Questão 4
+
+Considerando o banco de dados utilizado no exercício anterior, escolha duas variáveis para analisar via diagrama de dispersão. Comente brevemente seus achados.
+
+* Há uma forte correlação linear entre as variáveis analisadas, sendo que o coeficiente de correlação é `r cor(mydata$cty, mydata$hwy)`. Portanto, a autonomia por galão do automóvel na cidade é proporcional a sua autonomia na rodovia.  
+
+```{r warning=FALSE}
+mydata %>% 
+      ggplot(aes(y = cty, x = hwy)) + 
+      geom_point(aes(colour = class) ) +
+      geom_smooth(method = "lm") +
+      labs(title = "Highway miles per gallon vs City miles per gallon", 
+           y = "City miles per gallon", x = "Highway miles per gallon") + 
+      theme_bw() +
+      theme(plot.title = element_text(hjust=0.5, size = 12))
+```
+
+---
+
+## Questão 5
+
+Escoha duas variáveis do banco de dados e construa histograma e box-plot para elas. Personalize os gráficos usando cores diferentes do default. Não se esqueça de dar nom espara os eixos, bem como um título para os gráficos. Organize os gráficos em subplots usando `gride.arrange()`. Note que teremos 2 histogramas e 2 boxplots, totalizando gráficos que vc deve plotar em duas colunas.
+
+```{r}
+hg1 = mydata %>%
+    ggplot() + 
+    geom_histogram(aes(x = hwy), bins = 20, colour = "black", fill = "coral2") +
+    labs(title = "Highway miles per gallon - Histogram", x = "miles per gallon", y = "Count") +
+    theme_bw() +   
+    theme(plot.title = element_text(hjust=0.5,size = 11), axis.title = element_text(size = 9))
+
+bp1 = mydata %>%
+    ggplot() + 
+    geom_boxplot(aes(y = hwy), colour = "black", fill = "coral2") +
+    labs(title = "Highway miles per gallon - Boxplot", y = "miles per gallon") +
+    theme_bw() +
+    theme(plot.title = element_text(hjust=0.5,size = 11), axis.title = element_text(size = 9))
+
+hg2 = mydata %>%
+    ggplot() + 
+    geom_histogram(aes(x = cty), bins = 20, colour = "black", fill = "slateblue2") +
+    labs(title =  "City miles per gallon - Histogram", x = "miles per gallon", y = "Count") +
+    theme_bw() +   
+    theme(plot.title = element_text(hjust=0.5,size = 11), axis.title = element_text(size = 9))
+
+bp2 = mydata %>%
+    ggplot() + 
+    geom_boxplot(aes(y = cty), colour = "black", fill = "slateblue2") +
+    labs(title = "City miles per gallon - Boxplot", y = "miles per gallon") +
+    theme_bw() +
+    theme(plot.title = element_text(hjust=0.5,size = 11), axis.title = element_text(size = 9))
+
+
+grid.arrange(hg1, bp1, hg2, bp2, ncol = 2, top = "Distribution of city miller per gallon and highway miles per gallon") 
+```
+
+
+---
+
+## Questão 6
+
+Usando o arquivo de dados `mpg` ainda, vamos agora treinar o uso do recurso `facet`.
+
+### 6.1
+
+Faça gráficos de dispersão entre `displ` e `hwy` separados para cada classe de veı́culos. Use `color = class` para diferenciar por cor e `facet_wrap( ∼ class, nrow=2)` para obter os subplots
+
+```{r warning=FALSE}
+mydata %>% 
+      ggplot(aes(y = displ, x = hwy)) + 
+      geom_point(aes(colour = class) ) +
+      geom_smooth(method = "lm") +
+      labs(title = "Correlation between fuel consumption on the highway and engine displacement", 
+           y = "Engine displacement (l)", x = "Highway miles per gallon") + 
+      theme_bw() +
+      theme(plot.title = element_text(hjust = 0.5, size = 11), legend.position="none") + 
+      facet_wrap(~ class ,ncol =  2)
+   
+```
+
+### 6.2
+
+Agora vamos criar subplots com base em duas variáveis: número de cilindros `(cyl)` e tipo de direção `(drv)`. Diferencie por cor usando `color=drv` e utilize `facet_grid(drv ∼cyl)`. Algumas facetas ficarão vazias por não possuı́rem combinações de `drv` e `cyl`.
+
+
+```{r}
+mydata %>% 
+      ggplot() + 
+      geom_point(mapping = aes(x = cyl, y = drv, colour = drv)) +
+      labs(title = "Correlation between type of drive train and number of cylinders", 
+           y = "Type of drive train", x = "Number of cylinders") + 
+      theme_bw() +
+      theme(plot.title = element_text(hjust = 0.5, size = 11), legend.position="none") + 
+      facet_grid(drv ~ cyl)
+```
+
+
+
+### 6.3
+
+Explique o que ocorre se você usar `color=cyl` para classifcar por cilindros `(cyl)` e `facet_grid(. ∼ cyl)`.
+
+* O símbolo `.` ignora determinada dimensão ao gerar os subplots. Por exemplo, ao usar `facet_grid(. ∼ cyl)`, gerou-se subplots a partir dos valores de `cyl` no eixo-x e coloriu os pontos de acordo com os níveis dessa variável.
+
+```{r}
+mydata %>% 
+      ggplot() + 
+      geom_point(mapping = aes(x = cyl, y = drv, colour = cyl)) +
+      labs(title = "Correlation between type of drive train and number of cylinders", 
+           y = "Type of drive train", x = "Number of cylinders") + 
+      theme_bw() +
+      theme(plot.title = element_text(hjust = 0.5, size = 11)) + 
+      facet_grid(.~ cyl)
+```
+
+---
+
+## Questão 7
+
+**Corrupção x desenvolvimento humano** 
+
+Para realizar este exercı́cio, usaremos um banco de dados disponibilizado na página do nosso curso (homework3.xls). Para carregar este conjunto de dados no R, execute os seguintes comandos:
+
+```{r}
+library(readxl)
+homework3 = read_excel("homework3.xlsx")
+```
+Lembre-se de salvar o arquivo na pasta usada como diretório do R.
+
+Os dados dizem respeito basicamente ao ı́ndice de desenvolvimento humano (HDI) e percepção da corrupção (CPI)
+
+
+* Análise prévia da base de dados. 
+
+```{r}
+cat("Número de linhas: ", dim(homework3)[1])
+cat("\nNúmero de colunas: ", dim(homework3)[2])
+head(homework3)
+```
+
+* Converte as variáveis HDI  e CPI para o tipo numérico
+
+```{r}
+homework3[, c(3,4)] <- sapply(homework3[, c(3,4)], as.numeric)
+```
+
+
+* Breve resumo das estatísticas da base de dados
+
+```{r}
+summary(homework3)
+```
+
+
+### 7.1
+Construa um diagrama de dispersão entre as variáveis CPI (eixo x) e HDI (eixo y). Coloque a cor vermelha nos pontos.
+
+```{r}
+homework3 %>% 
+      ggplot(aes(x = CPI, y = HDI)) + 
+      geom_point(color = "red", size = 3) +
+      scale_shape_identity() +
+      labs(title = "Correlation between human development and corruption perception",  
+           y = "Human Development Index, 2011 (1 = best)", x = "Corruption Perceptions Index, 2011 (10 = least corrupt)") + 
+      theme_bw() +
+      theme(axis.title = element_text(size = 9, face = "italic")) +
+      scale_x_continuous(breaks = seq(0,10, 1), limits = c(1, 10)) +
+      scale_y_continuous(breaks = seq(0, 1, 0.1), limits = c(0.2, 1))
+```
+
+
+### 7.2
+Agora diferencie a cor dos pontos por região.
+
+```{r}
+homework3 %>% 
+      ggplot(aes(x = CPI, y = HDI)) + 
+      geom_point(mapping = aes(color = Region)) +
+      scale_shape_identity() +
+      labs(title = "Correlation between human development and corruption perception",  
+           y = "Human Development Index, 2011 (1 = best)", x = "Corruption Perceptions Index, 2011 (10 = least corrupt)") + 
+      theme_bw() +
+      theme(axis.title = element_text(size = 9, face = "italic")) +
+      scale_x_continuous(breaks = seq(0,10, 1), limits = c(1, 10)) +
+      scale_y_continuous(breaks = seq(0, 1, 0.1), limits = c(0.2, 1))
+```
+
+### 7.3
+Faça um gráfico com pontos maiores `(size =3)`
+
+```{r}
+homework3 %>% 
+      ggplot(aes(x = CPI, y = HDI)) + 
+      geom_point(mapping = aes(color = Region), size = 3) +
+      scale_shape_identity() +
+      labs(title = "Correlation between human development and corruption perception",  
+           y = "Human Development Index, 2011 (1 = best)", x = "Corruption Perceptions Index, 2011 (10 = least corrupt)") + 
+      theme_bw() +
+      theme(axis.title = element_text(size = 9, face = "italic")) +
+      scale_x_continuous(breaks = seq(0,10, 1), limits = c(1, 10)) +
+      scale_y_continuous(breaks = seq(0, 1, 0.1), limits = c(0.2, 1))
+```
+
+### 7.4
+Faça um gráfico em que o tamanho dos pontos dependa da variável HDI.  Inclua nomes nos eixos x e y, um título para o seu gráfico, bem como legendas que julgar necessárias.
+
+```{r}
+homework3 %>% 
+      ggplot(aes(x = CPI, y = HDI)) + 
+      geom_point(mapping = aes(color = Region, size = HDI)) +
+      scale_shape_identity() +
+      labs(title = "Correlation between human development and corruption perception",  
+           y = "Human Development Index, 2011 (1 = best)", x = "Corruption Perceptions Index, 2011 (10 = least corrupt)") + 
+      theme_bw() +
+      theme(axis.title = element_text(size = 9, face = "italic")) +
+      scale_x_continuous(breaks = seq(0,10, 1), limits = c(1, 10)) +
+      scale_y_continuous(breaks = seq(0, 1, 0.1), limits = c(0.2, 1))
+```
+
+
+### 7.5
+O arquivo Economist1.pdf disponı́vel junto com a lista de exercı́cios apresenta um gráfico usando os dados contidos no arquivo que estamos usando. Escreva um código no R usando ggplot que replica tão próximo quanto possı́vel o gráfico em questão.
+
+* Criar um subset com os países listados no gráfico modelo
+
+```{r}
+# Define os países que se quer filtrar
+target  = c("Congo", "Afghanistan" , "Sudan", "Myanmar", "Iraq", "Venezuela", "India", "South Africa", "China", "Argentina", "Russia", "Greece", "Brazil", "Italy", "Rwanda", "Cape Verde", "Bhutan", "Botswana", "Spain", "France", "US", "Germany", "Britain", "Barbados", "Japan", "Norway", "New Zealand", "Singapore")
+
+# Cria o subset temporário a partir da filtragem dos países listados
+temp = homework3 %>%
+  select(CPI, HDI, Country) %>%
+  filter(Country %in% target)
+
+head(temp)
+```
+
+* Plotagem do gráfico
+
+```{r}
+homework3 %>% 
+      ggplot(aes(x = CPI, y = HDI)) + 
+      geom_point(mapping = aes(color = Region), shape = 21, size = 2, stroke = 1.1) +
+      scale_shape_identity() +
+      geom_smooth(method = 'lm', formula = y~log(x), se = FALSE, color = "red") + 
+      labs(title = "Corruption and human development",  
+           y = "Human Development Index, 2011 (1 = best)", x = "Corruption Perceptions Index, 2011 (10 = least corrupt)") + 
+      theme_bw() +
+      theme(legend.position = "top", axis.title = element_text(size = 9, face = "italic")) +
+      scale_x_continuous(breaks = seq(0,10, 1), limits = c(1, 10)) +
+      scale_y_continuous(breaks = seq(0, 1, 0.1), limits = c(0.2, 1)) +
+      geom_text_repel(data = temp, aes(label = Country),
+                  box.padding   = 0.35,
+                  nudge_y  = 0.1,
+                  nudge_x  = 0.2,
+                  segment.size  = 0.2,
+                  point.padding = 0.5,
+                  segment.color = 'grey50')
+
+```
+
+
+

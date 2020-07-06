@@ -1,0 +1,222 @@
+---
+title: "HomeWork 1"
+author: "Wesley Galvão"
+date: "21/05/2020"
+output: 
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Questão 1
+
+Faça algumas operações matemáticas com os operadores listados na aula 1. Escolha pelo menos três operadores distintos. Faça também 3 combinações distintas entre os operadores.
+
+Os operadores são: 
+
+- Soma $+$
+
+- Subtração $-$
+
+- Divisão $/$
+
+- Multiplicação $*$
+
+- Exponenciação ^
+
+```{r}
+# Variáveis
+a = 5
+b = 7
+c = 8.2
+```
+
+$\frac{(a + c) \times a}{b}$
+```{r}
+((a + c)*a)/b
+```
+
+$4.5 \times \frac{b}{a}$
+
+```{r}
+4.5*b/a
+```
+
+$\frac{a^2 + b}{c} - 2 \times a$
+
+```{r}
+(a^2 + b)/c - 2*a
+```
+
+### Questão 2
+
+Suponha que um pesquisador tenha criado o pacote chamado UFSCar. Que comando
+você utilizaria para instalar tal pacote? Que comando você utilizaria para carregar tal pacote? Suponha que dentro deste pacote UFSCar tenha a função Sorocaba. Como você acabou de instalar este pacote, ainda não está familiarizado com os termos desta nova função. Como você poderia descobrir como utilizar este comando dentro do R? E fora do R?(Você pode fazer uma pesquisa para responder essa questão).
+
+- Para utilizar o pacote _UFSCar_ basta instalá-lo e carregá-lo através dos respectivos comandos : `install.packages('UFSCar')`  e `library(UFSCar)`.
+
+- Uma vez que o pacote _UFSCar_ esteja bem documentado, os usuários podem verificar o documento de utilização da função `sorocaba()` através dos comandos `?sorocaba` e `help(sorocaba)` no próprio console do R. 
+
+- Fora do R, a pesquisa a respeito do pacote e função pode ser feita no site oficial de documentações do R [R Documentation](https://www.rdocumentation.org) ou na comunidade [Stack Overflow](https://stackoverflow.com/).
+
+### Questão 3
+
+Como é possı́vel criar um chunk de código no R markdown? Quais as opções para
+usar knit? (Faça uma pesquisa para responder essa questão, ou use o card Rmarkdown disponibilizado no AVA).
+
+- É possível inserir um _code chunk_ por duas formas. Através do botão de insersão, com demonstrado na figura abaixo, ou pelo atalho de teclado `ctrl+shift+R`
+
+![How to insert a code chunck](http://i.imgur.com/SsUteAo.png)
+
+
+- Para utilizar o _knit_, use botão _Knit_ ilustrado na imagem acima ou o comando `render()`. Por padrão, o Rmarkdown pode ser renderizado para arquivos HTML, PDF e Word. 
+
+### Questão 4
+
+Teste qual a diferença entre criar um vetor usando a função `c()` e `c("")`.
+
+```{r}
+# Crie os vetores
+a = c(1,2,3)
+b = c('1','2','3')
+c = c(T,T,F)
+d = c("1,2,3")
+
+# Exiba o conteúdo de ambos os vetores
+cat(" Conteúdo do vetor a: ", a)
+cat("\n Conteúdo do vetor b: ", b)
+cat("\n Conteúdo do vetor c: ", c)
+cat("\n Conteúdo do vetor d: ", d)
+
+# Explore os tipos de dados
+cat("\n \n Tipo de dado do vetor a: ", typeof(a))
+cat("\n Tipo de dado do vetor b: ", typeof(b))
+cat("\n Tipo de dado do vetor c: ", typeof(c))
+cat("\n Tipo de dado do vetor d: ", typeof(d))
+```
+
+Enquanto a função `c()` pode criar vetores de diferentes tipos, onde os elementos são separados por vírgula, a função `c("")` cria vetores do tipo conjunto de caracteres, como demonstrado no vetor _d_. Ou seja, tudo o que estiver entre pararênteses é considerado carácter. 
+
+### Questão 5
+
+Crie um vetor de todos números inteiros maiores do que 1 e menores do que 1000. Em seguida, crie um vetor com as mesmas caracterı́sticas, contudo apenas números pares. 
+Dica: obviamente não espero que você digite elemento por elemento
+
+- Vetor com inteiros maiores que 1 e menores que 1000
+
+```{r}
+a = c(2:999)
+a 
+```
+
+- Vetor com inteiros pares maiores que 1 e menores que 1000
+
+```{r}
+b = seq(from=2,to=999,by=2)
+b
+```
+
+### Questão 6
+
+Calcule o número de ouro no R.Resolução baseada no conteúdo do sites [R-Bloggers](https://www.r-bloggers.com/example-7-1-create-a-fibonacci-sequence/) e  [InfoEscola](https://www.infoescola.com/matematica/numero-de-ouro/).
+
+A proporção áurea é definida por $\phi=\frac{1+\sqrt{5}}{2}=1,6180339887...$.
+Assim: 
+```{r}
+(1+sqrt(5)) / 2  
+```
+
+
+- Vamos calcular primeiramente a sequência de Fibonacci para 15 números
+
+```{r}
+tam = 20 # Defina o tamanho da sequência
+fib = numeric(tam) # Cria um vetor nulo de tamanho 10
+fib[1] = 1 
+fib[2] = 1
+
+for(i in 3 : tam)
+  fib[i] = fib[i - 1] + fib[i - 2]
+
+fib
+```
+
+- Para encontrar a proporção áurea a partir da sequência fazemos a razão entre dois número consecutivos até um critério de parada, como a melhor aproximação: 
+
+![](http://i.imgur.com/9mMaXSk.png)
+
+
+- Para calcular o número de ouro através da sequência encontrada, temos: 
+```{r}
+golden = numeric(tam)
+for(i in 3 : tam)
+  golden[i] = abs(fib[i-1]/fib[i-2])
+golden
+```
+
+- Podemos extrair o último elemento do vetor que é o valor que mais se aproxima da definição. Então temos que o número áureo é dado por:
+
+```{r}
+golden[tam]
+```
+
+### Questão 7
+
+Qual o resultado da divisão de 1 por 0 no R? E de -1 por 0?
+
+```{r}
+# Divisão de 1 por 0
+cat("1/0: ", 1/0)
+# Divisão de -1 por 0
+cat("\n-1/0: ", -1/0)
+```
+
+O valor Inf significa infinito. 
+
+### Questão 8
+
+Verifique quais as diferenças entre NaN, NULL, NA e Inf? Digite expressões que
+retornem cada um desses resultados.
+
+- `NaN : Not a Number, ou seja, não definido com um número`
+```{r}
+0/0
+```
+
+- `NULL : Elemento nulo ou vazio`
+```{r}
+nulo = NULL
+nulo
+```
+- `NA : Elemento faltante, não existe`
+```{r}
+faltante = c(NA, 1:10)
+faltante
+```
+
+
+- `Inf : infinito`
+```{r}
+1/0
+```
+
+
+### Questão 9
+
+Verifique o que retorna a expressão ` 5 + 3 * 10 %/% 3 == 15` retorna no R. Faça a expressão retornar o valor contrário apenas usando parênteses - ou seja, se a expressão retornar originariamente TRUE, faça retornar FALSE. Explique o que faz a expressão original.
+
+- O operador %/% retorna a divisão inteira entre dois operandos.
+
+A expressão original retorna:  
+```{r}
+5 + 3 * 10 %/% 3 == 15
+```
+
+Para que retorne TRUE, a expressão do lado esquerdo do operador deve resultar o valor 35, portanto: 
+
+```{r}
+(5 + (3 * 10)) %/% 3 == 15
+```
+
