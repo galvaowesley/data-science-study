@@ -1,2 +1,14 @@
 # Data Science Learning
-A repository that contains my lecture notes about Data Science learning and challenges. 
+
+This repository contains my lecture notes and projects about Data Science. 
+
+## Content Tree
+
+```
+├── exploratory-data-analysis
+|   ├── minicurso-data-science
+|   └── movie-lens-analyse
+├── projects
+├── statistic
+
+```
