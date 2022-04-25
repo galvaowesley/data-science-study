@@ -1,0 +1,223 @@
+
+---
+title: "Análise de Dados - Coronavírus Brasil"
+author: "Andreza Palma"
+date: "16/06/2020"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+Pessoal, vamos verificar como tudo que aprendemos pode nos ajudar a analisar os dados sobre coronavirus no Brasil. Usarei uma adaptação de "Analise de Dados COVID-19 de Jean Jesus".
+
+Os dados estão disponíveis em: https://covid.saude.gov.br/
+
+Primeiro, vamos carregar os pacotes que utilizaremos.
+
+Pacotes utilizados:
+
+```{r}
+library(dplyr)     # Manipulação de dados 
+library(tidyr)     # Manipulação de dados
+library(ggplot2)   # Criação de graficos
+library(readxl)     #Leitura de arquivos em Excel
+library(patchwork)  #Subplots
+library(scales)     #trabalhar com escalas nos gráficos
+
+```
+
+
+Salve os dados e transfira para o R. Abaixo os comandos. 
+ 
+```{r}
+
+corona = read_excel("HIST_PAINEL_COVIDBR_15jun2020.xlsx", 
+                                            col_types = c("text",    # Regiao
+                                                          "text",    # Estado
+                                                          "text",    # Municipio
+                                                          "text",    # coduf
+                                                          "numeric", # codmun
+                                                          "numeric", # codRegiaoSaude
+                                                          "text",    # nomeRegiaoSaude
+                                                          "date",    # data
+                                                          "numeric", # semanaEpi
+                                                          "text",    # populacaoTCU2019
+                                                          "numeric", # casosAcumulado
+                                                          "numeric", # casosNovos
+                                                          "numeric", # obitosAcumulado
+                                                          "numeric", # obitosNovos
+                                                          "numeric", # Recuperadosnovos
+                                                          "numeric"  # emAcompanhamentoNovos
+                                                          ))
+
+
+```
+
+
+Vamos olhar nosso banco de dados usando head:
+
+```{r}
+head(corona)
+```
+
+Nosso primeiro objetivo é fazer um gráfico de mortes por região. Para isso, vamos excluir toda a informação referente ao Brasil (que é o total). Para fazer isso, vamos usar filter para criar um novo conjunto de dados chamada coronaregiao. 
+
+```{r}
+coronaregião=filter(corona, !is.na(corona$estado)& is.na(corona$municipio))
+head(coronaregião)
+```
+
+Agora precisamos criar a variável mortesPorRegião:
+
+```{r}
+mortesPorRegiao <- coronaregião %>%
+  select(regiao, obitosNovos) %>%
+  group_by(regiao) %>%
+  summarise(total = sum(obitosNovos))
+```
+
+E finalmente o gráfico:
+```{r}
+ggplot(mortesPorRegiao, aes(x = regiao, y = total ))+ 
+  geom_bar(stat = "identity", aes(fill = regiao))+
+  scale_fill_manual(values=c("darkgoldenrod2", "cornsilk3", "cyan3","coral2","brown4"))+
+  labs(
+    title = "COVID-19",
+    subtitle = "(Mortes por regiao)",
+    x = "Regioes",
+    y = "N° de mortes",
+    face = "bold"
+  )+
+  geom_text(aes(label = total, vjust = -0.4) )+
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    plot.subtitle = element_text(hjust = 0.5),
+    legend.position = "none"
+  )
+```
+
+Agora nosso objetivo é conhecer os 5 estados mais afetados com base no total de casos. 
+
+```{r}
+top5estados <-   coronaregião %>%
+  select(estado, casosNovos) %>%
+  group_by(estado) %>%
+  summarise(total_casos = sum(casosNovos)) %>%
+  arrange(desc(total_casos))
+
+# realização do rank 5 
+top5estados <- top_n(top5estados, 5)
+```
+
+Agora o gráfico:
+
+```{r}
+ggplot(top5estados, mapping = aes(x = estado, y = total_casos))+
+  geom_bar(stat = "identity", aes(fill = estado))+
+  labs(
+    title = "Estados Mais Afetados",
+    subtitle = "TOP 5",
+    x = "Estado",
+    y = "Casos",
+    tag = "        "
+  )+
+  geom_text(aes(label = total_casos, vjust = -0.3) )+
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    plot.subtitle = element_text(hjust = 0.5)
+  )+  scale_fill_discrete(name = "Estado")
+```
+
+Vamos avaliar a evolução do número de novos casos no Brasil. Vamos olhar os dados agregados para o Brasil e treinar o uso de filter mais uma vez. Para isso, vamos excluir todos os dados relativos aos estados e municípios. Além disso, vamos retirar as colunas que não nos interessam (usamos select com o sinal de - para fazer isso.)
+
+```{r}
+corona_Brasil <- corona%>%
+  filter(is.na(estado), is.na(codmun)) %>%
+  select(-estado, -municipio, -codmun, -codRegiaoSaude, -nomeRegiaoSaude,
+         -coduf)
+
+
+```
+
+Agora basta fazer o gráfico usando a coluna de casosAcumulados:
+
+```{r}
+acumuladoBR=ggplot(corona_Brasil, aes(data, casosAcumulado)) +
+  geom_line(color="blue")
+acumuladoBR
+```
+
+Agora o número de óbitos novos:
+
+```{r}
+newdeaths=ggplot(corona_Brasil, aes(data, obitosNovos)) +
+  geom_line(color="red")
+newdeaths
+```
+
+Óbitos Acumulados:
+
+```{r}
+deathsAc=ggplot(corona_Brasil, aes(data, obitosAcumulado)) +
+  geom_line(color="red")
+deathsAc
+```
+
+E por fim, podemos avaliar o número de novos casos por dia no Brasi:
+
+```{r}
+newcases=ggplot(corona_Brasil, aes(x = data, y = casosNovos)) +
+  geom_line(color="blue")
+newcases
+```
+
+Para colocar os gráficos em subplots vamos usar o pacote patchwork dessa vez.
+```{r}
+newcases + acumuladoBR + newdeaths+deathsAc
+```
+
+Registro também como podemos selecionar apenas um estado (por exemplo, o estado de SP):
+
+```{r}
+estado_SP=corona %>%
+  filter(!is.na(estado), is.na(codmun), estado=="SP")
+
+```
+
+Para selecionar apenas os municípios:
+
+```{r}
+municípios=municipios <- corona %>%
+  filter(!is.na(estado), !is.na(municipio))
+```
+
+E um município apenas, por exemplo, Sorocaba:
+
+
+```{r}
+Sorocaba=municipios <- corona %>%
+  filter(!is.na(estado), !is.na(municipio), municipio=="Sorocaba")
+```
+
+Para finalizar, vamos fazer um gráfico com os óbitos acumulados de todos os estados. 
+Primeiro, vamos filtrar por estado e depois usar ggplot para obter o gráfico. Note que temos um problema de escala, pois enquanto alguns estados tem muitos óbitos, outros tem menos. Para contornar isso, iremos usar o pacote o pacote scales para fazer a escala livre em cada subplot.  Vamos lá.
+
+```{r}
+corona_estados = corona %>%
+  filter(!is.na(estado), is.na(codmun))
+
+ggplot(corona_estados, aes(data, obitosAcumulado)) +
+  geom_line(color="blue") +
+  facet_wrap(vars(estado), ncol = 4, scales = "free_y")+
+  labs(
+    title = "COVID-19 - Estados",
+    subtitle = "(Óbitos Acumulados por Estado)"
+    )
+```
+
+
+
