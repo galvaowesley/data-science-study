@@ -1,4 +1,4 @@
-# Data Science Learning
+# Data Science Study
 
 This repository contains my lecture notes and projects about Data Science. 
 
